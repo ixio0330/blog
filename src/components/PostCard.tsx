@@ -19,16 +19,17 @@ export function PostCard({ slug, title, tags, createdAt }: PostCardProps) {
   return (
     <Link
       to={`/posts/${slug}`}
-      className="block rounded-lg px-4 py-4 no-underline transition-colors hover:bg-border/50 dark:hover:bg-border-dark/50"
+      className="group block rounded-lg px-5 py-5 no-underline transition-all duration-200 hover:bg-surface dark:hover:bg-surface-dark"
     >
-      <h2 className="mb-1 text-lg font-semibold text-text dark:text-text-dark">
+      <h2 className="mb-2 text-base font-semibold text-text transition-colors group-hover:text-accent dark:text-text-dark dark:group-hover:text-accent-dark">
         {title}
       </h2>
-      <div className="flex items-center gap-3 font-mono text-sm text-muted dark:text-muted-dark">
+      <div className="flex items-center gap-3 font-mono text-xs tracking-wide text-muted dark:text-muted-dark">
         <time>{formatDate(createdAt)}</time>
-        <div className="flex gap-1.5">
+        <span className="text-border dark:text-border-dark">/</span>
+        <div className="flex gap-2">
           {tags.map((tag) => (
-            <span key={tag}>#{tag}</span>
+            <span key={tag} className="dark:text-accent-dark/40">{tag}</span>
           ))}
         </div>
       </div>

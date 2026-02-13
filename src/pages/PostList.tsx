@@ -34,28 +34,26 @@ export function PostList() {
 
   return (
     <div>
-      <div className="mb-6 border-b border-border pb-6 dark:border-border-dark">
-        <div className="flex flex-wrap gap-2">
+      <nav className="mb-10 flex flex-wrap gap-1">
+        <TagBadge
+          tag="all"
+          plain
+          active={activeTag === null}
+          onClick={() => setActiveTag(null)}
+        />
+        {allTags.map((tag) => (
           <TagBadge
-            tag="전체"
-            plain
-            active={activeTag === null}
-            onClick={() => setActiveTag(null)}
+            key={tag}
+            tag={tag}
+            active={activeTag === tag}
+            onClick={() => setActiveTag(activeTag === tag ? null : tag)}
           />
-          {allTags.map((tag) => (
-            <TagBadge
-              key={tag}
-              tag={tag}
-              active={activeTag === tag}
-              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-            />
-          ))}
-        </div>
-      </div>
+        ))}
+      </nav>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col">
         {filtered.length === 0 ? (
-          <p className="py-8 text-center font-mono text-muted dark:text-muted-dark">
+          <p className="py-12 text-center font-mono text-sm text-muted dark:text-muted-dark">
             아직 작성된 글이 없습니다.
           </p>
         ) : (

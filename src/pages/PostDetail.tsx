@@ -42,7 +42,7 @@ export function PostDetail() {
 
   if (loading) {
     return (
-      <p className="py-8 text-center font-mono text-muted dark:text-muted-dark">
+      <p className="py-8 text-center font-mono text-sm text-muted dark:text-muted-dark">
         불러오는 중...
       </p>
     );
@@ -52,34 +52,34 @@ export function PostDetail() {
     <article>
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 cursor-pointer bg-transparent font-mono text-sm text-muted transition-colors hover:text-accent dark:text-muted-dark dark:hover:text-accent-dark"
+        className="mb-8 cursor-pointer bg-transparent font-mono text-sm tracking-wide text-muted transition-colors hover:text-accent dark:text-muted-dark dark:hover:text-accent-dark"
       >
         &larr; 돌아가기
       </button>
 
       {meta && (
-        <header className="mb-8">
-          <h1 className="mb-2 text-2xl font-bold">{meta.title}</h1>
-          <div className="flex items-center gap-3 font-mono text-sm text-muted dark:text-muted-dark">
+        <header className="mb-10">
+          <h1 className="mb-3 text-2xl font-bold leading-tight">
+            {meta.title}
+          </h1>
+          <div className="flex items-center gap-3 font-mono text-xs tracking-wide text-muted dark:text-muted-dark">
             <time>{formatDate(meta.createdAt)}</time>
-            <div className="flex gap-1.5">
+            <span className="text-border dark:text-border-dark">/</span>
+            <div className="flex gap-2">
               {meta.tags.map((tag) => (
-                <span key={tag}>#{tag}</span>
+                <span key={tag} className="dark:text-accent-dark/40">
+                  {tag}
+                </span>
               ))}
             </div>
           </div>
         </header>
       )}
 
-      <div className="border-t border-border pt-8 dark:border-border-dark">
-        <div className="prose max-w-none">
-          <Markdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {content}
-          </Markdown>
-        </div>
+      <div className="prose max-w-none">
+        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          {content}
+        </Markdown>
       </div>
     </article>
   );

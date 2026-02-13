@@ -9,13 +9,13 @@ export function TagBadge({ tag, active, plain, onClick }: TagBadgeProps) {
   return (
     <button
       onClick={onClick}
-      className={`cursor-pointer rounded-md px-2 py-0.5 font-mono text-sm transition-colors ${
+      className={`cursor-pointer rounded-full px-3 py-1 font-mono text-xs tracking-wide transition-all duration-200 ${
         active
-          ? 'bg-accent text-white dark:bg-accent-dark'
-          : 'bg-border text-muted hover:bg-accent/10 hover:text-accent dark:bg-border-dark dark:text-muted-dark dark:hover:bg-accent-dark/10 dark:hover:text-accent-dark'
+          ? 'bg-accent/10 text-accent dark:bg-accent-dark/15 dark:text-accent-dark'
+          : 'text-muted hover:text-text dark:text-muted-dark dark:hover:text-accent-dark/70'
       }`}
     >
-      {plain ? tag : `#${tag}`}
+      {plain ? tag : tag}
     </button>
   )
 }

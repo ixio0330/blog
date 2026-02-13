@@ -1,68 +1,71 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@custom-variant dark (&:where(.dark, .dark *));
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-accent: #2563eb;
+  --color-accent-dark: #3b82f6;
+  --color-bg: #fafafa;
+  --color-bg-dark: #0a0a0a;
+  --color-text: #171717;
+  --color-text-dark: #e5e5e5;
+  --color-muted: #737373;
+  --color-muted-dark: #a3a3a3;
+  --color-border: #e5e5e5;
+  --color-border-dark: #262626;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
+    "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+html {
+  font-family:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.dark body {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Markdown prose overrides for dark mode */
+.dark .prose {
+  --tw-prose-body: var(--color-text-dark);
+  --tw-prose-headings: var(--color-text-dark);
+  --tw-prose-links: var(--color-accent-dark);
+  --tw-prose-bold: var(--color-text-dark);
+  --tw-prose-code: var(--color-text-dark);
+  --tw-prose-pre-bg: #1a1a1a;
+  --tw-prose-pre-code: var(--color-text-dark);
+  --tw-prose-quotes: var(--color-muted-dark);
+  --tw-prose-hr: var(--color-border-dark);
+  --tw-prose-th-borders: var(--color-border-dark);
+  --tw-prose-td-borders: var(--color-border-dark);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.prose :where(code):not(:where(pre *)) {
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+  font-size: 0.875em;
+}
+
+.dark .prose :where(code):not(:where(pre *)) {
+  background-color: #262626;
+}
+
+/* highlight.js theme override for dark mode */
+.dark pre code.hljs {
+  background: #1a1a1a;
 }

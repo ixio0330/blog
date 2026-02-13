@@ -10,6 +10,8 @@ lerna-debug.log*
 
 node_modules
 dist
+src/generated
+public/posts
 dist-ssr
 *.local
 

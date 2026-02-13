@@ -5,7 +5,7 @@
 
 @theme {
   --color-accent: #2563eb;
-  --color-accent-dark: #3b82f6;
+  --color-accent-dark: #22c55e;
   --color-bg: #fafafa;
   --color-bg-dark: #0a0a0a;
   --color-text: #171717;
@@ -68,4 +68,43 @@ body {
 /* highlight.js theme override for dark mode */
 .dark pre code.hljs {
   background: #1a1a1a;
+}
+
+/* CRT scanlines — dark mode only */
+.crt-scanlines {
+  display: none;
+}
+
+.dark .crt-scanlines {
+  display: block;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+}
+
+/* CRT vignette — dark mode only */
+.crt-vignette {
+  display: none;
+}
+
+.dark .crt-vignette {
+  display: block;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+/* Matrix green glow for dark mode */
+.dark .matrix-glow {
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+}
+
+.dark .matrix-glow:hover {
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.8);
 }

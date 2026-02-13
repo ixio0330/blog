@@ -1,10 +1,11 @@
 interface TagBadgeProps {
   tag: string
   active?: boolean
+  plain?: boolean
   onClick?: () => void
 }
 
-export function TagBadge({ tag, active, onClick }: TagBadgeProps) {
+export function TagBadge({ tag, active, plain, onClick }: TagBadgeProps) {
   return (
     <button
       onClick={onClick}
@@ -14,7 +15,7 @@ export function TagBadge({ tag, active, onClick }: TagBadgeProps) {
           : 'bg-border text-muted hover:bg-accent/10 hover:text-accent dark:bg-border-dark dark:text-muted-dark dark:hover:bg-accent-dark/10 dark:hover:text-accent-dark'
       }`}
     >
-      #{tag}
+      {plain ? tag : `#${tag}`}
     </button>
   )
 }

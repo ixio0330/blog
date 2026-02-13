@@ -1,10 +1,26 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PostCard } from '../components/PostCard'
 import { TagBadge } from '../components/TagBadge'
-import manifest from '../generated/posts-manifest.json'
+import type { PostMeta } from '../types'
+import _manifest from '../generated/posts-manifest.json'
+
+const manifest = _manifest as PostMeta[]
 
 export function PostList() {
-  const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTag = searchParams.get('tag')
+
+  const setActiveTag = useCallback(
+    (tag: string | null) => {
+      if (tag) {
+        setSearchParams({ tag })
+      } else {
+        setSearchParams({})
+      }
+    },
+    [setSearchParams],
+  )
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -21,7 +37,8 @@ export function PostList() {
       <div className="mb-6 border-b border-border pb-6 dark:border-border-dark">
         <div className="flex flex-wrap gap-2">
           <TagBadge
-            tag="all"
+            tag="전체"
+            plain
             active={activeTag === null}
             onClick={() => setActiveTag(null)}
           />
@@ -39,7 +56,7 @@ export function PostList() {
       <div className="flex flex-col gap-1">
         {filtered.length === 0 ? (
           <p className="py-8 text-center font-mono text-muted dark:text-muted-dark">
-            No posts yet.
+            아직 작성된 글이 없습니다.
           </p>
         ) : (
           filtered.map((post) => (

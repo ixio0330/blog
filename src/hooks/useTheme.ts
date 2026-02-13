@@ -9,7 +9,7 @@ function getSystemTheme(): Theme {
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem('theme')
   if (stored === 'light' || stored === 'dark') return stored
-  return getSystemTheme()
+  return 'dark'
 }
 
 export function useTheme() {

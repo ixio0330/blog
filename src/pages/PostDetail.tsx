@@ -1,57 +1,61 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeHighlight from 'rehype-highlight'
-import 'highlight.js/styles/github-dark.css'
-import manifest from '../generated/posts-manifest.json'
+import "highlight.js/styles/github-dark.css";
+import { useEffect, useState } from "react";
+import Markdown from "react-markdown";
+import { useNavigate, useParams } from "react-router-dom";
+import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
+import _manifest from "../generated/posts-manifest.json";
+import type { PostMeta } from "../types";
+
+const manifest = _manifest as PostMeta[];
 
 function formatDate(iso: string): string {
-  const d = new Date(iso)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}.${m}.${day}`
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
 }
 
 export function PostDetail() {
-  const { slug } = useParams<{ slug: string }>()
-  const [content, setContent] = useState<string>('')
-  const [loading, setLoading] = useState(true)
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [content, setContent] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
-  const meta = manifest.find((p) => p.slug === slug)
+  const meta = manifest.find((p) => p.slug === slug);
 
   useEffect(() => {
-    if (!slug) return
+    if (!slug) return;
     fetch(`${import.meta.env.BASE_URL}posts/${slug}.md`)
       .then((res) => {
-        if (!res.ok) throw new Error('Not found')
-        return res.text()
+        if (!res.ok) throw new Error("Not found");
+        return res.text();
       })
       .then((text) => {
-        const match = text.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/)
-        setContent(match ? match[1] : text)
+        const match = text.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+        setContent(match ? match[1] : text);
       })
-      .catch(() => setContent('# Post not found'))
-      .finally(() => setLoading(false))
-  }, [slug])
+      .catch(() => setContent("# 글을 찾을 수 없습니다"))
+      .finally(() => setLoading(false));
+  }, [slug]);
 
   if (loading) {
     return (
       <p className="py-8 text-center font-mono text-muted dark:text-muted-dark">
-        Loading...
+        불러오는 중...
       </p>
-    )
+    );
   }
 
   return (
     <article>
-      <Link
-        to="/"
-        className="mb-6 inline-block font-mono text-sm text-muted no-underline transition-colors hover:text-accent dark:text-muted-dark dark:hover:text-accent-dark"
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 cursor-pointer bg-transparent font-mono text-sm text-muted transition-colors hover:text-accent dark:text-muted-dark dark:hover:text-accent-dark"
       >
-        &larr; back
-      </Link>
+        &larr; 돌아가기
+      </button>
 
       {meta && (
         <header className="mb-8">
@@ -69,11 +73,14 @@ export function PostDetail() {
 
       <div className="border-t border-border pt-8 dark:border-border-dark">
         <div className="prose max-w-none">
-          <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
             {content}
           </Markdown>
         </div>
       </div>
     </article>
-  )
+  );
 }

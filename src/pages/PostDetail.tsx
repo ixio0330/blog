@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
 import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import _manifest from "../generated/posts-manifest.json";
 import type { PostMeta } from "../types";
@@ -77,7 +78,7 @@ export function PostDetail() {
       )}
 
       <div className="prose max-w-none">
-        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]}>
           {content}
         </Markdown>
       </div>

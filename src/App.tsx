@@ -1,7 +1,7 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
-import { Layout } from './components/Layout'
-import { PostList } from './pages/PostList'
-import { PostDetail } from './pages/PostDetail'
+import { HashRouter, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { PostDetail } from "./pages/PostDetail";
+import { PostList } from "./pages/PostList";
 
 export default function App() {
   return (
@@ -9,9 +9,9 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<PostList />} />
-          <Route path="/posts/:slug" element={<PostDetail />} />
+          <Route path="/posts/*" element={<PostDetail />} />
         </Routes>
       </Layout>
     </HashRouter>
-  )
+  );
 }

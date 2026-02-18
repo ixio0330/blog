@@ -19,7 +19,8 @@ function formatDate(iso: string): string {
 }
 
 export function PostDetail() {
-  const { slug } = useParams<{ slug: string }>();
+  const params = useParams();
+  const slug = params["*"];
   const navigate = useNavigate();
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -78,7 +79,10 @@ export function PostDetail() {
       )}
 
       <div className="prose max-w-none">
-        <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]}>
+        <Markdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight, rehypeRaw]}
+        >
           {content}
         </Markdown>
       </div>

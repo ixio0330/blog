@@ -15,6 +15,19 @@ interface PostMeta {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  excerpt: string;
+}
+
+function extractExcerpt(content: string, length = 150): string {
+  const plainText = content
+    .replace(/<[^>]+>/g, "") // Remove HTML tags
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove link syntax but keep text
+    .replace(/[#*`>_~-]/g, "") // Remove basic markdown characters
+    .replace(/\s+/g, " ") // Collapse whitespaces
+    .trim();
+
+  if (plainText.length <= length) return plainText;
+  return plainText.slice(0, length) + "...";
 }
 
 function getGitDate(file: string, flags: string): string {
@@ -53,7 +66,8 @@ function main() {
 
   const posts: PostMeta[] = allFiles.map((absolutePath) => {
     const raw = fs.readFileSync(absolutePath, "utf-8");
-    const { data } = matter(raw);
+    const { data, content } = matter(raw);
+    const excerpt = extractExcerpt(content, 150);
 
     // Get relative path from POSTS_DIR (e.g., "category/post.md")
     const relativePath = path.relative(POSTS_DIR, absolutePath);
@@ -76,6 +90,7 @@ function main() {
       tags: (data.tags as string[]) || [],
       createdAt,
       updatedAt,
+      excerpt,
     };
   });
 

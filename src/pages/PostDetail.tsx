@@ -6,6 +6,7 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import _manifest from "../generated/posts-manifest.json";
+import { useMeta } from "../hooks/useMeta";
 import type { PostMeta } from "../types";
 
 const manifest = _manifest as PostMeta[];
@@ -41,6 +42,11 @@ export function PostDetail() {
       .catch(() => setContent("# 글을 찾을 수 없습니다"))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useMeta({
+    title: meta ? `${meta.title} - ~/blog` : undefined,
+    description: meta?.excerpt,
+  });
 
   if (loading) {
     return (

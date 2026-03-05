@@ -1,36 +1,42 @@
-import { useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { PostCard } from '../components/PostCard'
-import { TagBadge } from '../components/TagBadge'
-import type { PostMeta } from '../types'
-import _manifest from '../generated/posts-manifest.json'
+import { useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { PostCard } from "../components/PostCard";
+import { TagBadge } from "../components/TagBadge";
+import _manifest from "../generated/posts-manifest.json";
+import { useMeta } from "../hooks/useMeta";
+import type { PostMeta } from "../types";
 
-const manifest = _manifest as PostMeta[]
+const manifest = _manifest as PostMeta[];
 
 export function PostList() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const activeTag = searchParams.get('tag')
+  useMeta({
+    title: "~/blog",
+    description: "~/blog",
+  });
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTag = searchParams.get("tag");
 
   const setActiveTag = useCallback(
     (tag: string | null) => {
       if (tag) {
-        setSearchParams({ tag })
+        setSearchParams({ tag });
       } else {
-        setSearchParams({})
+        setSearchParams({});
       }
     },
     [setSearchParams],
-  )
+  );
 
   const allTags = useMemo(() => {
-    const tagSet = new Set<string>()
-    manifest.forEach((post) => post.tags.forEach((t) => tagSet.add(t)))
-    return Array.from(tagSet).sort()
-  }, [])
+    const tagSet = new Set<string>();
+    manifest.forEach((post) => post.tags.forEach((t) => tagSet.add(t)));
+    return Array.from(tagSet).sort();
+  }, []);
 
   const filtered = activeTag
     ? manifest.filter((post) => post.tags.includes(activeTag))
-    : manifest
+    : manifest;
 
   return (
     <div>
@@ -69,5 +75,5 @@ export function PostList() {
         )}
       </div>
     </div>
-  )
+  );
 }

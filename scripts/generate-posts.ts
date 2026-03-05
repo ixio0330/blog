@@ -1,7 +1,9 @@
+import { Resvg } from "@resvg/resvg-js";
 import matter from "gray-matter";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import satori from "satori";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const POSTS_DIR = path.join(ROOT, "posts");
@@ -30,16 +32,160 @@ function extractExcerpt(content: string, length = 150): string {
   return plainText.slice(0, length) + "...";
 }
 
-function getGitDate(file: string, flags: string): string {
-  try {
-    const result = execSync(`git log ${flags} --format=%aI -- "${file}"`, {
-      encoding: "utf-8",
-      cwd: ROOT,
-    }).trim();
-    return result || new Date().toISOString();
-  } catch {
-    return new Date().toISOString();
+async function generateOgImage(
+  title: string,
+  date: string,
+  outputPath: string,
+  excerpt?: string,
+) {
+  const fontDataPath = path.resolve(
+    ROOT,
+    "node_modules",
+    "@fontsource",
+    "noto-sans-kr",
+    "files",
+    "noto-sans-kr-korean-700-normal.woff",
+  );
+
+  const fontDataKR = fs.readFileSync(fontDataPath);
+
+  const fontDataInter = fs.readFileSync(
+    path.join(ROOT, "scripts", "fonts", "Inter-Bold.ttf"),
+  );
+
+  const svg = await satori(
+    {
+      type: "div",
+      props: {
+        style: {
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          backgroundColor: "#0a0a0a", // var(--color-bg-dark)
+          padding: "80px",
+          border: "4px solid #1a1a1a", // var(--color-border-dark)
+          fontFamily: '"Noto Sans KR"',
+        },
+        children: [
+          {
+            type: "div",
+            props: {
+              style: {
+                display: "flex",
+                flexDirection: "column",
+                gap: "32px",
+              },
+              children: [
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      fontSize: "36px",
+                      color: "#22c55e", // var(--color-accent-dark)
+                      textShadow: "0 0 10px rgba(34, 197, 94, 0.6)", // .matrix-glow
+                      fontFamily: '"Inter"',
+                    },
+                    children: "~/blog",
+                  },
+                },
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "16px",
+                      width: "100%", // Force full width for description wrapping
+                    },
+                    children: [
+                      {
+                        type: "div",
+                        props: {
+                          style: {
+                            fontSize: "52px", // Slightly smaller
+                            fontWeight: 700,
+                            color: "#d0d0d0", // var(--color-text-dark)
+                            lineHeight: "1.3",
+                            letterSpacing: "-0.02em",
+                          },
+                          children: title,
+                        },
+                      },
+                      ...(excerpt
+                        ? [
+                            {
+                              type: "div",
+                              props: {
+                                style: {
+                                  fontSize: "28px",
+                                  color: "#a1a1aa", // lighter muted color
+                                  lineHeight: "1.5",
+                                  width: "100%", // Force text spanning
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                },
+                                children: excerpt,
+                              },
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            type: "div",
+            props: {
+              style: {
+                display: "flex",
+                fontSize: "28px",
+                color: "#606060", // var(--color-muted-dark)
+              },
+              children: date,
+            },
+          },
+        ],
+      },
+    } as any,
+    {
+      width: 1200,
+      height: 630,
+      fonts: [
+        {
+          name: "Noto Sans KR",
+          data: fontDataKR,
+          weight: 700,
+          style: "normal",
+        },
+        {
+          name: "Inter",
+          data: fontDataInter,
+          weight: 700,
+          style: "normal",
+        },
+      ],
+    },
+  );
+
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: "width", value: 1200 },
+  });
+
+  const pngData = resvg.render().asPng();
+
+  const destDir = path.dirname(outputPath);
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
   }
+
+  fs.writeFileSync(outputPath, pngData);
 }
 
 function getFilesRecursive(dir: string): string[] {
@@ -56,7 +202,7 @@ function getFilesRecursive(dir: string): string[] {
   return files;
 }
 
-function main() {
+async function main() {
   if (!fs.existsSync(POSTS_DIR)) {
     fs.mkdirSync(POSTS_DIR, { recursive: true });
   }
@@ -64,35 +210,67 @@ function main() {
   // Get all .md files with full paths
   const allFiles = getFilesRecursive(POSTS_DIR);
 
-  const posts: PostMeta[] = allFiles.map((absolutePath) => {
+  // Parse files first
+  const parsedPosts = allFiles.map((absolutePath) => {
     const raw = fs.readFileSync(absolutePath, "utf-8");
     const { data, content } = matter(raw);
     const excerpt = extractExcerpt(content, 150);
 
-    // Get relative path from POSTS_DIR (e.g., "category/post.md")
     const relativePath = path.relative(POSTS_DIR, absolutePath);
-
-    // Create slug from relative path (remove extension)
-    // On Windows, path separators might need normalization, but assuming *nix/Mac given environment
     const slug = relativePath.replace(/\.md$/, "");
-
-    // For git log, we need path relative to repo root
-    // absolutePath is /Users/.../blog/posts/category/post.md
-    // relative to ROOT is posts/category/post.md
     const gitPath = path.relative(ROOT, absolutePath);
 
-    const createdAt = getGitDate(gitPath, "--follow --diff-filter=A");
-    const updatedAt = getGitDate(gitPath, "-1");
+    // Format YYYY.MM.DD
+    const isoDate = new Date().toISOString(); // Default to now if not available
+    const d = new Date(isoDate);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const formattedDate = `${y}.${m}.${day}`;
 
     return {
+      absolutePath,
+      relativePath,
       slug,
       title: (data.title as string) || slug,
       tags: (data.tags as string[]) || [],
-      createdAt,
-      updatedAt,
+      createdAt: isoDate,
+      updatedAt: isoDate,
       excerpt,
+      formattedDate,
     };
   });
+
+  // Try to populate git dates (synchronous but slow, so we do it all at once)
+  parsedPosts.forEach((post) => {
+    const gitPath = path.relative(ROOT, post.absolutePath);
+    try {
+      const createdStr = execSync(
+        `git log --follow --diff-filter=A --format=%aI -- "${gitPath}"`,
+        { encoding: "utf-8", cwd: ROOT },
+      ).trim();
+      const updatedStr = execSync(`git log -1 --format=%aI -- "${gitPath}"`, {
+        encoding: "utf-8",
+        cwd: ROOT,
+      }).trim();
+
+      if (createdStr) {
+        post.createdAt = createdStr;
+        const d = new Date(createdStr);
+        post.formattedDate = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+      }
+      if (updatedStr) post.updatedAt = updatedStr;
+    } catch {}
+  });
+
+  const posts: PostMeta[] = parsedPosts.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    tags: p.tags,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+    excerpt: p.excerpt,
+  }));
 
   posts.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -108,19 +286,34 @@ function main() {
   }
   fs.mkdirSync(PUBLIC_POSTS, { recursive: true });
 
-  for (const absolutePath of allFiles) {
-    const relativePath = path.relative(POSTS_DIR, absolutePath);
-    const destPath = path.join(PUBLIC_POSTS, relativePath);
+  for (const post of parsedPosts) {
+    const destPath = path.join(PUBLIC_POSTS, post.relativePath);
 
     const destDir = path.dirname(destPath);
     if (!fs.existsSync(destDir)) {
       fs.mkdirSync(destDir, { recursive: true });
     }
 
-    fs.copyFileSync(absolutePath, destPath);
+    fs.copyFileSync(post.absolutePath, destPath);
+
+    // Generate OG image
+    const ogImagePath = path.join(
+      ROOT,
+      "public",
+      "og-images",
+      `${post.slug}.png`,
+    );
+    await generateOgImage(
+      post.title,
+      post.formattedDate,
+      ogImagePath,
+      post.excerpt,
+    );
   }
 
-  console.log(`Generated ${posts.length} posts → ${OUTPUT_FILE}`);
+  console.log(
+    `Generated ${posts.length} posts and their OG images → ${OUTPUT_FILE}`,
+  );
 }
 
 main();

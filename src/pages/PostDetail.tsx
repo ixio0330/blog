@@ -46,6 +46,9 @@ export function PostDetail() {
   useMeta({
     title: meta ? `${meta.title} - ~/blog` : undefined,
     description: meta?.excerpt,
+    image: meta
+      ? `${window.location.origin}${import.meta.env.BASE_URL}og-images/${meta.slug}.png`
+      : undefined,
   });
 
   if (loading) {

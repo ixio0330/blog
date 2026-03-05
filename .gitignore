@@ -12,6 +12,7 @@ node_modules
 dist
 src/generated
 public/posts
+public/og-images
 dist-ssr
 *.local
 

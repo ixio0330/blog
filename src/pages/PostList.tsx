@@ -12,6 +12,7 @@ export function PostList() {
   useMeta({
     title: "~/blog",
     description: "~/blog",
+    image: `${window.location.origin}${import.meta.env.BASE_URL}og-images/default.png`,
   });
 
   const [searchParams, setSearchParams] = useSearchParams();

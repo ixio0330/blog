@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "prebuild": "tsx scripts/generate-posts.ts",
+    "postbuild": "tsx scripts/generate-html.ts",
     "dev": "yarn prebuild && vite",
-    "build": "yarn prebuild && tsc -b && vite build",
+    "build": "yarn prebuild && tsc -b && vite build && yarn postbuild",
     "lint": "eslint .",
     "preview": "vite preview"
   },

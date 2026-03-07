@@ -21,7 +21,14 @@ function formatDate(iso: string): string {
 
 export function PostDetail() {
   const params = useParams();
-  const slug = params["*"];
+  let slug = params["*"] || "";
+
+  if (slug.endsWith("/index.html")) {
+    slug = slug.replace(/\/index\.html$/, "");
+  } else if (slug.endsWith("/")) {
+    slug = slug.slice(0, -1);
+  }
+
   const navigate = useNavigate();
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);

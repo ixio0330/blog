@@ -217,7 +217,7 @@ async function main() {
     const excerpt = extractExcerpt(content, 150);
 
     const relativePath = path.relative(POSTS_DIR, absolutePath);
-    const slug = relativePath.replace(/\.md$/, "");
+    const slug = path.basename(absolutePath).replace(/\.md$/, "");
     const gitPath = path.relative(ROOT, absolutePath);
 
     // Format YYYY.MM.DD
@@ -287,12 +287,7 @@ async function main() {
   fs.mkdirSync(PUBLIC_POSTS, { recursive: true });
 
   for (const post of parsedPosts) {
-    const destPath = path.join(PUBLIC_POSTS, post.relativePath);
-
-    const destDir = path.dirname(destPath);
-    if (!fs.existsSync(destDir)) {
-      fs.mkdirSync(destDir, { recursive: true });
-    }
+    const destPath = path.join(PUBLIC_POSTS, `${post.slug}.md`);
 
     fs.copyFileSync(post.absolutePath, destPath);
 

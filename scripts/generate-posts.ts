@@ -218,49 +218,70 @@ async function main() {
 
     const relativePath = path.relative(POSTS_DIR, absolutePath);
     const slug = path.basename(absolutePath).replace(/\.md$/, "");
-    const gitPath = path.relative(ROOT, absolutePath);
-
-    // Format YYYY.MM.DD
-    const isoDate = new Date().toISOString(); // Default to now if not available
-    const d = new Date(isoDate);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const formattedDate = `${y}.${m}.${day}`;
 
     return {
       absolutePath,
       relativePath,
       slug,
+      data, // Pass whole frontmatter data
       title: (data.title as string) || slug,
       tags: (data.tags as string[]) || [],
-      createdAt: isoDate,
-      updatedAt: isoDate,
+      createdAt: "", // Will be populated
+      updatedAt: "", // Will be populated
       excerpt,
-      formattedDate,
+      formattedDate: "", // Will be populated
     };
   });
 
-  // Try to populate git dates (synchronous but slow, so we do it all at once)
+  // Populate dates - prefer frontmatter, then git, then now.
   parsedPosts.forEach((post) => {
     const gitPath = path.relative(ROOT, post.absolutePath);
+
+    // 1. Created date
+    if (post.data.date) {
+      // Use frontmatter date if available
+      const d = new Date(post.data.date);
+      post.createdAt = d.toISOString();
+      post.formattedDate = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+    } else {
+      // Fallback to git creation date
+      try {
+        const createdStr = execSync(
+          `git log --follow --diff-filter=A --format=%aI -- "${gitPath}"`,
+          { encoding: "utf-8", cwd: ROOT },
+        ).trim();
+        if (createdStr) {
+          post.createdAt = createdStr;
+          const d = new Date(createdStr);
+          post.formattedDate = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+        }
+      } catch {
+        // Errors in git are ignored, will fallback later
+      }
+    }
+
+    // 2. Updated date - always use git for this
     try {
-      const createdStr = execSync(
-        `git log --follow --diff-filter=A --format=%aI -- "${gitPath}"`,
-        { encoding: "utf-8", cwd: ROOT },
-      ).trim();
       const updatedStr = execSync(`git log -1 --format=%aI -- "${gitPath}"`, {
         encoding: "utf-8",
         cwd: ROOT,
       }).trim();
-
-      if (createdStr) {
-        post.createdAt = createdStr;
-        const d = new Date(createdStr);
-        post.formattedDate = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+      if (updatedStr) {
+        post.updatedAt = updatedStr;
       }
-      if (updatedStr) post.updatedAt = updatedStr;
-    } catch {}
+    } catch {
+      // Errors in git are ignored
+    }
+    
+    // 3. Final fallback for any missing dates
+    const now = new Date();
+    if (!post.createdAt) {
+      post.createdAt = now.toISOString();
+      post.formattedDate = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
+    }
+    if (!post.updatedAt) {
+      post.updatedAt = post.createdAt;
+    }
   });
 
   const posts: PostMeta[] = parsedPosts.map((p) => ({

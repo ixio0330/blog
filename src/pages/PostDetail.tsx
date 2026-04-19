@@ -1,6 +1,7 @@
 import "highlight.js/styles/github-dark.css";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Markdown from "react-markdown";
+import type { Components } from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
 import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
@@ -17,6 +18,98 @@ function formatDate(iso: string): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}.${m}.${day}`;
+}
+
+function getCodeText(value: React.ReactNode): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(getCodeText).join("");
+  return "";
+}
+
+function resolveAssetUrl(src?: string): string {
+  if (!src) return "";
+  if (/^(https?:)?\/\//.test(src) || src.startsWith("data:")) return src;
+
+  const baseUrl = import.meta.env.BASE_URL;
+  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return `${normalizedBase}${src.replace(/^\/+/, "")}`;
+}
+
+function MermaidBlock({ chart }: { chart: string }) {
+  const [svg, setSvg] = useState<string>("");
+  const [error, setError] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "default">("default");
+  const id = useId().replace(/:/g, "-");
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncTheme = () => {
+      setTheme(root.classList.contains("dark") ? "dark" : "default");
+    };
+
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function render() {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "loose",
+          theme,
+        });
+
+        const { svg: renderedSvg } = await mermaid.render(`mermaid-${id}`, chart);
+        if (!cancelled) {
+          setSvg(renderedSvg);
+          setError(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setSvg("");
+          setError(true);
+        }
+      }
+    }
+
+    render();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [chart, id, theme]);
+
+  if (error) {
+    return (
+      <pre className="mermaid-fallback">
+        <code>{chart}</code>
+      </pre>
+    );
+  }
+
+  if (!svg) {
+    return <div className="mermaid-chart">Rendering chart...</div>;
+  }
+
+  return (
+    <div
+      className="mermaid-chart"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
 }
 
 export function PostDetail() {
@@ -66,6 +159,25 @@ export function PostDetail() {
     );
   }
 
+  const markdownComponents: Components = {
+    code({ className, children, ...props }) {
+      const isMermaid = /language-mermaid/.test(className || "");
+
+      if (isMermaid) {
+        return <MermaidBlock chart={getCodeText(children).trim()} />;
+      }
+
+      return (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    },
+    img({ src, alt, ...props }) {
+      return <img src={resolveAssetUrl(src)} alt={alt || ""} {...props} />;
+    },
+  };
+
   return (
     <article>
       <button
@@ -96,6 +208,7 @@ export function PostDetail() {
 
       <div className="prose max-w-none">
         <Markdown
+          components={markdownComponents}
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeHighlight, rehypeRaw]}
         >

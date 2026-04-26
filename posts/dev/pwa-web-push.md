@@ -3,7 +3,7 @@ title: PWA에서 푸시 알림 보내기
 tags: [개발, 프론트엔드, PWA]
 ---
 
-이전에 쓴 [WIG 개발 후기](https://ixio0330.github.io/blog/posts/wig)에서 왜 PWA로 푸시 알림을 전송하게 되었는지에 대해, 그리고 [PWA로 홈 화면에 추가할 수 있는 웹앱 만들기](https://ixio0330.github.io/blog/posts/pwa)에서는 PWA에 대해 다뤘다. 이번 글에서는 WIG의 PWA에서 푸시 알림이 어떤 흐름으로 동작하는지 정리해보려고 한다.
+이전에 쓴 [Dowin 개발 후기](https://ixio0330.github.io/blog/posts/dowin)에서 왜 PWA로 푸시 알림을 전송하게 되었는지에 대해, 그리고 [PWA로 홈 화면에 추가할 수 있는 웹앱 만들기](https://ixio0330.github.io/blog/posts/pwa)에서는 PWA에 대해 다뤘다. 이번 글에서는 Dowin의 PWA에서 푸시 알림이 어떤 흐름으로 동작하는지 정리해보려고 한다.
 
 간략하게 설명하면, 서비스 워커와 브라우저 Push API로 구독을 만들고, 그 구독 정보를 서버 DB에 저장한 뒤, 스케줄러가 내부 발송 API를 호출하면 서버가 VAPID 서명된 Web Push를 각 endpoint로 직접 보내는 구조다.
 

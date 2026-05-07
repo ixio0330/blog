@@ -3,7 +3,7 @@ title: Dowin 개발 후기
 tags: [개발, 일상]
 ---
 
-<a href="https://wig.dasoslab.com/" target="_blank">Dowin</a>는 목표 설정부터 기록, 주간 점검까지 하나의 흐름으로 이어주는 목표 트래커다.
+<a href="https://dowin.app/" target="_blank">Dowin</a>는 목표 설정부터 기록, 주간 점검까지 하나의 흐름으로 이어주는 목표 트래커다.
 
 ## 배경
 

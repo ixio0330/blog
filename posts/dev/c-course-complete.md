@@ -1,6 +1,6 @@
 ---
 title: C언어 입문기
-tags: [일상]
+tags: [개발]
 ---
 
 <div align="center">

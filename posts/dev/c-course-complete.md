@@ -4,7 +4,7 @@ tags: [개발]
 ---
 
 <div align="center">
-  <img src="/images/c-course-complete.jpg" alt="C언어 강의 수료 인증 사진" width="500" />
+  <img src="/images/c-course-complete.png" alt="C언어 강의 수료 인증 사진" width="500" />
 </div>
 
 작년에 널널한 개발자님의 네트워크 강의를 듣고 나서 충동 구매한 C언어 강의,, 약 30시간 분량으로 꽤 길다. 그래서 쉽게 시작하지 못했는데 매일 꾸준히 2~3시간씩 보니 보름 좀 안되서 완강한 것 같다. 이 강의는 문법만 가르쳐주는 게 아니라 CS 지식을 기반으로 C언어가 어떻게 동작하는지 자세하게 알려준다는 점이 정말 좋았다.

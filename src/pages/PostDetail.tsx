@@ -3,8 +3,10 @@ import { useEffect, useId, useState } from "react";
 import Markdown from "react-markdown";
 import type { Components } from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import _manifest from "../generated/posts-manifest.json";
 import { useMeta } from "../hooks/useMeta";
@@ -210,7 +212,7 @@ export function PostDetail() {
         <Markdown
           components={markdownComponents}
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight, rehypeRaw]}
+          rehypePlugins={[rehypeHighlight, rehypeRaw, rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]]}
         >
           {content}
         </Markdown>
